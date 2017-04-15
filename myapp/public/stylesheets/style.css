@@ -1,22 +1,20 @@
 body{
-	background-color: #FF4040;
+	background-color: powderblue;
 	text-align: center;
 }
 
-h1,h2{
-	font-family: cursive;
-	color: yellow;
-}
-
-form{
-	margin-left: auto;
-	margin-right: auto;
-	width: 50%;
+.start{
+	margin-left: 40%;
+	margin-right:50%;
+	width: 15%;
 	background-color: green;
 
 }
-.className{
+#winnerPrint{
 	
+}
+.className{
+
 }
 img{
 	/*float: left*/

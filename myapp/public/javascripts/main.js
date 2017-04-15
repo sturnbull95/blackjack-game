@@ -1,7 +1,5 @@
 function main(){
-	//console.log(document.getElementById('startValues'));
 	var button = document.querySelector('.playBtn');
-	console.log(button);
 	button.addEventListener('click',function(e){
 		e.preventDefault();
 		document.querySelector('.start').style.display = 'none';
@@ -15,24 +13,34 @@ function main(){
 		document.querySelector('.game').appendChild(winnerPrintOut);
 		var compImgClass = document.createElement('div');
 		compImgClass.className = 'computerIClass';
-		var computerImg = document.createElement('IMG');
-		computerImg.id = 'compImg';
-		var playerImg = document.createElement('IMG');
-		playerImg.id = 'playImg';
-		document.querySelector('.game').appendChild(computerImg);
-		document.querySelector('.game').appendChild(playerImg);
+
+		compContain = document.createElement('div');
+		compContain.id = 'cHand';
+		playContain = document.createElement('div');
+		playContain.id = 'pHand';
+		document.querySelector('.game').appendChild(compContain);
+		document.querySelector('.game').appendChild(playContain);
 		cards = generateCards();
 		playerTotal = calculateHand(player);
-		initialVal = [];
+		computerTotal = calculateHand(computer);
 		shuffledDeck = shuffle(cards);
+
+		compContain.appendChild(computer[0].img);
+		playContain.appendChild(player[0].img);
+
+		compContain.appendChild(computer[1].img);
+		playContain.appendChild(player[1].img);
+
 		var playerPrintOut = document.createElement('P');
 		playerPrintOut.id = 'playerPrint';
 		playerPrintOut.style.display = '';
+
 		var computerPrintOut = document.createElement('P');
 		computerPrintOut.id = 'computerPrint';
 		computerPrintOut.style.display = '';
 		document.querySelector('.game').appendChild(playerPrintOut);
 		document.querySelector('.game').appendChild(computerPrintOut);
+
 		var hitButton = document.createElement('input');
 		hitButton.type = 'button';
 		hitButton.id = 'btn_hit';
@@ -41,19 +49,22 @@ function main(){
 		hitButton.addEventListener('click', function(e){
 			playerMove('h');});
 		document.querySelector('.game').appendChild(hitButton);
+
 		var standButton = document.createElement('input');
 		standButton.type = 'button';
 		standButton.id = 'btn_stand';
 		standButton.value = 'Stand';
 		standButton.style.display = '';
 		standButton.addEventListener('click', function(e){
-			setInterval(playerMove('s'),1000);});
+			playerMove('s');});
 		document.querySelector('.game').appendChild(standButton);
-		//document.getElementById("winnerPrint").innerHTML = "The Winner is: " + determineWinner(playerTotal,computerTotal);
 		document.getElementById("playerPrint").innerHTML = "Your total is: " + playerTotal;
 		document.getElementById("computerPrint").innerHTML = "Computer total is: ?";
+		document.getElementById("playerPrint").style.display = '';
+		document.getElementById("computerPrint").style.display = '';
+
 		var resetButton = document.createElement('input');
-		resetButton.type = 'button';
+		resetButton.type = 'reset';
 		resetButton.id = 'btn_reset';
 		resetButton.value = 'Reset';
 		resetButton.style.display = 'none';
@@ -67,8 +78,12 @@ function main(){
 document.addEventListener('DOMContentLoaded', main);
 
 
-
-
+function createImg(src){
+	var computerImg = document.createElement('IMG');
+	computerImg.src =  src;
+	return computerImg;
+}
+// FIND A CARD IN THE DECK
 function findCard(card,deck){
 	for(var i = 0; i < deck.length; i++){
 		if(deck[i].face == card.face && deck[i].suit == card.suit){
@@ -77,14 +92,36 @@ function findCard(card,deck){
 	}
 	return -1;
 }
+
+// RESET THE GAME
 function resetGame(){
-	document.querySelector('.start').reset();
-	// document.querySelector('.start').style.display = '';
-	// document.getElementById('btn_reset').style.display = 'none';
-	// document.getElementById('computerPrint').style.display = 'none';
-	// document.getElementById('playerPrint').style.display = 'none';
-	// document.getElementById("startValues").value = '';
+	initialVal = [];
+	for(var i = 0; i < player.length; i++){
+		player[i].img.remove();
+	}
+	for(var i = 0; i < computer.length; i++){
+		computer[i].img.remove();
+	}
+	player = [];
+	computer = [];
+	document.getElementById('btn_reset').style.display = 'none';
+	document.getElementById('winnerPrint').style.display = 'none';
+	document.getElementById('btn_hit').style.display = '';
+	document.getElementById('btn_stand').style.display = '';
+	cards = generateCards();
+	playContain.appendChild(player[0].img);
+	playContain.appendChild(player[1].img);
+	compContain.appendChild(computer[0].img);
+	compContain.appendChild(computer[1].img);
+	playerTotal = calculateHand(player);
+	//shuffledDeck = shuffle(cards);
+	document.getElementById('playerPrint').innerHTML = "Your total is: " + playerTotal;
+	document.getElementById('computerPrint').innerHTML = "Computer total is: ?";
+	document.getElementById('playerPrint').style.display = '';
+	document.getElementById('computerPrint').style.display = '';
 }
+
+// GENERATE THE DECK
 function generateCards() {
 	var suit = ['spades', 'hearts', 'diamonds', 'clubs'];
 	var face = ['2', '3', '4', '5', '6', '7',
@@ -98,10 +135,16 @@ function generateCards() {
 		}while(findCard(thisCard,computer) != -1 || findCard(thisCard,player) != -1);
 
 		if(i % 2){
+			thisCard.img = createImg(getImg(thisCard));
+			thisCard.img.id = 'p_' + i>>1;
 			player.push(thisCard);
-			document.getElementById('playImg').src = getImg(thisCard);
 		}
 		else{
+			thisCard.img = createImg(getImg(thisCard));
+			if(i == 0){
+				thisCard.img.src = 'images/backOfCard.png';
+			}
+			thisCard.img.id = 'c_' + i>>1;
 			computer.push(thisCard);
 		}
 	}
@@ -115,11 +158,31 @@ function generateCards() {
 			if(findCard(card,computer) != -1 || findCard(card,player) != -1){
 				continue;
 			}
+			card.img = createImg(getImg(card));
 			deck.push(card);
+		}
+	}
+	if(initialVal.length == 0){
+		shuffledDeck = shuffle(deck);
+		deck = shuffledDeck;
+		for(var i = 0; i < 2; i++){
+			computer.push(deck[0]);
+			computer[i].img = createImg(getImg(computer[i]));
+			if(i == 0){
+				computer[i].img.src = 'images/backOfCard.png';
+			}
+			computer[i].img.id = 'c_' + i;
+			deck.splice(0,1);
+			player.push(deck[0]);
+			player[i].img = createImg(getImg(player[i]));
+			player[i].img.id = 'p_' + i;
+
+			deck.splice(0,1);
 		}
 	}
 	return deck;
 }
+
 // FUNCTION TO GET IMG FOR CARD
 function getImg(card){
 	var img = '';
@@ -305,20 +368,24 @@ function getImg(card){
 			img = "ace_of_diamonds.svg";
 		}
 	}
-	return img;
+
+	//card.img = createImg(img);
+	return 'images/' + img;
 }
 
+// SHUFFLE DECK
 function shuffle(deck) {
-var shuffledDeck = new Array();
-var index;
-for (var i = 0; i < deck.length; i++) {
-	index = Math.floor(Math.random() * deck.length);
-	shuffledDeck.push(deck[index]);
-	deck.splice(index, 1);
-}
-return shuffledDeck;
+	var shuffledDeck = new Array();
+	var index;
+	for (var i = 0; i < deck.length; i++) {
+		index = Math.floor(Math.random() * deck.length);
+		shuffledDeck.push(deck[index]);
+		deck.splice(index, 1);
+	}
+	return shuffledDeck;
 }
 
+// CALCULATE HAND TOTAL
 function calculateHand(cards) {
 	var total = 0;
 	var length = cards.length;
@@ -342,32 +409,28 @@ function calculateHand(cards) {
 	}
 	return total;
 }
+
+// DETERMINE THE WINNER
 function determineWinner(human, computer) {
 	var winner = '';
 	if (human > 21 || computer > 21) {
 		if (human > 21 && computer > 21) {
+			console.log(human);
+			console.log(computer);
 			winner = "YOU BOTH BUST!";
-			document.getElementById('btn_stand').style.display = 'none';
-			document.getElementById('btn_hit').style.display = 'none';
 			return winner;
 		}
 		if (human <= 21) {
-			winner = "You win!";
-			document.getElementById('btn_stand').style.display = 'none';
-			document.getElementById('btn_hit').style.display = 'none';
+			winner = "Computer Busts, You win!";
 			return winner;
 		}
 		else {
-			winner = "Computer wins!";
-			document.getElementById('btn_stand').style.display = 'none';
-			document.getElementById('btn_hit').style.display = 'none';
+			winner = "You Bust, Computer wins!";
 			return winner;
 		}
 	}
 	if (human==computer){
 		winner = "It's a tie!!!";
-		document.getElementById('btn_stand').style.display = 'none';
-		document.getElementById('btn_hit').style.display = 'none';
 		return winner;
 	}
 	else {
@@ -375,30 +438,28 @@ function determineWinner(human, computer) {
 		var compDif = 21-computer;
 		if (humanDif>compDif) {
 			winner = 'Computer wins!';
-			document.getElementById('btn_stand').style.display = 'none';
-			document.getElementById('btn_hit').style.display = 'none';
+			return winner;
 		}
 		else {
 			winner = "You win!";
-			document.getElementById('btn_stand').style.display = 'none';
-			document.getElementById('btn_hit').style.display = 'none';
+			return winner;
 		}
 	}
-	return winner;
 }
 
+// PLAYER MOVE
 function playerMove(move){
 	switch (move) {
 		case 'h':
 			// Deal one card, calculate value, remove from deck
 				player.push(shuffledDeck[0]);
+				playContain.appendChild(player[player.length-1].img);
 				playerTotal = calculateHand(player);
 				shuffledDeck.splice(0, 1);
-				console.log("playerTotal: " + playerTotal);
 				document.getElementById('playerPrint').innerHTML = "Your total is: " + playerTotal;
-				// select DOM object responsible for player score (div/span with value inside)
 				if(playerTotal > 21){
-					document.getElementById('playerPrint').innerHTML = 'You Busted';
+					document.getElementById('winnerPrint').innerHTML = determineWinner(playerTotal,computerTotal);
+					document.getElementById('winnerPrint').style.display = '';
 					document.getElementById('btn_hit').style.display = 'none';
 					document.getElementById('btn_stand').style.display = 'none';
 					document.getElementById('btn_reset').style.display = '';
@@ -413,7 +474,6 @@ function playerMove(move){
 			document.getElementById('btn_hit').style.display = 'none';
 			document.getElementById('btn_stand').style.display = 'none';
 			document.getElementById('btn_reset').style.display = '';
-			document.getElementById(determineWinner(playerTotal,computerTotal));
 			break;
 		default:
 			alert('Unknown Value ' + move);
@@ -422,29 +482,29 @@ function playerMove(move){
 	}
 }
 
-//GAME STARTS
-var initialVal = false;
-var player = false;
-var computer = false;
-var cards = false;
-var shuffledDeck = false;
-var playerTotal = false;
-var computerTotal = 0;
+// COMPUTER MOVE
 function startAI(){
 	stay = false;
-	while (!stay) {
+	if(computer[0].img.src.indexOf('images/backOfCard.png') != -1) {
+		computer[0].img.src = getImg(computer[0]);
+	}
+	//while (!stay) {
 		computerTotal = calculateHand(computer);
 		document.getElementById("computerPrint").innerHTML = "Computer total is: " + computerTotal;
-		console.log("computerTotal: " + computerTotal);
 		if (computerTotal >= 17 && computerTotal <= 21) {
 			stay = true;
-			break;
+			document.getElementById('winnerPrint').innerHTML = determineWinner(playerTotal,computerTotal);
+			document.getElementById('winnerPrint').style.display = '';
+			return;
 		}
 		if(computerTotal > 21){
-			document.getElementById("computerPrint").innerHTML = "Computer Busted";
-			break;
+			document.getElementById('winnerPrint').innerHTML = determineWinner(playerTotal,computerTotal);
+			document.getElementById('winnerPrint').style.display = '';
+			return;
 		}
 		computer.push(shuffledDeck[0]);
+		compContain.appendChild(computer[computer.length-1].img);
 		shuffledDeck.splice(0, 1);
-	}
+		setTimeout(startAI,1000);
+	//}
 }
